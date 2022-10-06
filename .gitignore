@@ -1,1 +1,6 @@
 *.tar
+*.jpg
+*.h5
+*.db
+*.ini
+*.mat
