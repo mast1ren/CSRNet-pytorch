@@ -62,8 +62,6 @@ def main():
     with open(args.test_json, 'r') as outfile:
         val_list = json.load(outfile)
 
-    
-
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     # torch.backends.cudnn.enabled = True
 
@@ -94,9 +92,11 @@ def main():
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.pre, checkpoint['epoch']))
-        
-            train_loss = json.loads(vis.get_window_data(win="train_loss", env="csrnet"))
-            test_error = json.loads(vis.get_window_data(win="test_error", env="csrnet"))
+
+            train_loss = json.loads(vis.get_window_data(
+                win="train_loss", env="csrnet"))
+            test_error = json.loads(vis.get_window_data(
+                win="test_error", env="csrnet"))
             epoch_list = train_loss["content"]["data"][0]["x"]
             train_loss_list = train_loss["content"]["data"][0]["y"]
             test_error_list = test_error["content"]["data"][0]["y"]
@@ -112,7 +112,7 @@ def main():
         epoch_list.append(epoch+1)
         train_loss_list.append(losses.avg)
         test_error_list.append(prec1.item())
-        
+
         is_best = prec1 < best_prec1
         best_prec1 = min(prec1, best_prec1)
         print(' * best MAE {mae:.3f} '.format(mae=best_prec1))
@@ -124,10 +124,11 @@ def main():
             'optimizer': optimizer.state_dict(),
         }, is_best, args.task)
 
-
         # visdom plot
-        vis.line(win='train_loss', X=epoch_list, Y=train_loss_list, opts=dict(title='train_loss'))
-        vis.line(win='test_error', X=epoch_list, Y=test_error_list, opts=dict(title='test_error'))
+        vis.line(win='train_loss', X=epoch_list,
+                 Y=train_loss_list, opts=dict(title='train_loss'))
+        vis.line(win='test_error', X=epoch_list,
+                 Y=test_error_list, opts=dict(title='test_error'))
 
         # show an image
         # test_dataset = dataset.listDataset(val_list,
@@ -169,7 +170,7 @@ def train(train_list, model, criterion, optimizer, epoch):
         data_time.update(time.time() - end)
 
         img = img.cuda()
-        
+
         # img = Variable(img)
         output = model(img)
 
@@ -199,12 +200,12 @@ def train(train_list, model, criterion, optimizer, epoch):
                   .format(
                       epoch, i, len(train_loader), batch_time=batch_time,
                       data_time=data_time, loss=losses), end="")
-        
+
     return losses
 
 
 def validate(val_list, model):
-    print('\rbegin test', end="\n")
+    print('\nbegin test', end="\n")
     test_loader = torch.utils.data.DataLoader(
         dataset.listDataset(val_list,
                             shuffle=False,
@@ -227,9 +228,12 @@ def validate(val_list, model):
                        target.sum().type(torch.FloatTensor).cuda())
             if i == 0:
                 print(img.shape, output.shape, target.shape)
-                vis.image(win='image', img=img.squeeze(0).cpu(), opts=dict(title='img'))
-                vis.image(win='gt', img=target.squeeze(0), opts=dict(title='gt ('+str(target.sum())+')'))
-                vis.image(win='et', img=output.cpu(), opts=dict(title='et ('+str(output.data.sum())+')'))
+                vis.image(win='image', img=img.squeeze(
+                    0).cpu(), opts=dict(title='img'))
+                vis.image(win='gt', img=target.squeeze(0), opts=dict(
+                    title='gt ('+str(target.sum())+')'))
+                vis.image(win='et', img=output.cpu(), opts=dict(
+                    title='et ('+str(output.data.sum())+')'))
 
     mae = mae/len(test_loader)
     print(' * MAE {mae:.3f} '
