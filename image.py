@@ -34,6 +34,6 @@ def load_data(img_path, train=True):
     target = cv2.resize(
         target, (target.shape[1]//8, target.shape[0]//8), interpolation=cv2.INTER_CUBIC)*64
     # target = cv2.resize(
-        # target, (target.shape[1]//4, target.shape[0]//4), interpolation=cv2.INTER_CUBIC)*16
+    #     target, (target.shape[1]//4, target.shape[0]//4), interpolation=cv2.INTER_CUBIC)*16
     # print(target.shape)
     return img, target
