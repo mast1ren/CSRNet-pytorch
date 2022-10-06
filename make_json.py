@@ -25,4 +25,4 @@ def get_jpg_path(path, set):
     f.close()
 
 for var in ['train', 'test', 'val']:
-    get_jpg_path('../ds/dronebird', var)
+    get_jpg_path('../../ds/dronebird', var)
