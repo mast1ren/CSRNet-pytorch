@@ -227,7 +227,7 @@ def validate(val_list, model):
             mae += abs(output.data.sum() -
                        target.sum().type(torch.FloatTensor).cuda())
             if i == 0:
-                print(img.shape, output.shape, target.shape)
+                # print(img.shape, output.shape, target.shape)
                 vis.image(win='image', img=img.squeeze(
                     0).cpu(), opts=dict(title='img'))
                 vis.image(win='gt', img=target.squeeze(0), opts=dict(
