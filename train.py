@@ -192,19 +192,19 @@ def train(train_list, model, criterion, optimizer, epoch):
         end = time.time()
 
         if i % args.print_freq == 0:
-            print('Epoch: [{0}][{1}/{2}]\t'
+            print('\rEpoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   .format(
                       epoch, i, len(train_loader), batch_time=batch_time,
-                      data_time=data_time, loss=losses))
+                      data_time=data_time, loss=losses), end="")
         
     return losses
 
 
 def validate(val_list, model):
-    print('begin test')
+    print('\rbegin test', end="\n")
     test_loader = torch.utils.data.DataLoader(
         dataset.listDataset(val_list,
                             shuffle=False,
