@@ -56,7 +56,7 @@ def main():
     args.scales = [1, 1, 1, 1]
     args.workers = 4
     args.seed = time.time()
-    args.print_freq = 30
+    args.print_freq = 5
     with open(args.train_json, 'r') as outfile:
         train_list = json.load(outfile)
     with open(args.test_json, 'r') as outfile:
@@ -193,19 +193,19 @@ def train(train_list, model, criterion, optimizer, epoch):
         end = time.time()
 
         if i % args.print_freq == 0:
-            print('\rEpoch: [{0}][{1}/{2}]\t'
+            print('\rEpoch: [{epoch}][{batch:>{width}}/{length}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
                   .format(
-                      epoch, i, len(train_loader), batch_time=batch_time,
-                      data_time=data_time, loss=losses), end="")
-
+                      epoch=epoch, batch=i, width=len(str(len(train_loader))), length=len(train_loader), batch_time=batch_time,
+                      data_time=data_time, loss=losses), end='')
+    print('')
     return losses
 
 
 def validate(val_list, model):
-    print('\nbegin test', end="\n")
+    print('begin test')
     test_loader = torch.utils.data.DataLoader(
         dataset.listDataset(val_list,
                             shuffle=False,
