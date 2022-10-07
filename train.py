@@ -71,7 +71,7 @@ def main():
     model = CSRNet()
 
     model = model.cuda()
-    criterion = nn.MSELoss(size_average=False).cuda()
+    criterion = nn.MSELoss(reduction='sum').cuda()
     # model = model
     # criterion = nn.MSELoss(size_average=False)
 
