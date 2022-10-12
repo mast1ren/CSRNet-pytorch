@@ -218,6 +218,7 @@ def validate(val_list, model):
     model.eval()
 
     mae = 0
+    visual = random.randint(0, len(val_list)-1)
     with torch.no_grad():
         for i, (img, target) in enumerate(test_loader):
             img = img.cuda()
@@ -226,14 +227,14 @@ def validate(val_list, model):
 
             mae += abs(output.data.sum() -
                        target.sum().type(torch.FloatTensor).cuda())
-            if i == 0:
+            if i == visual:
                 # print(img.shape, output.shape, target.shape)
                 vis.image(win='image', img=img.squeeze(
-                    0).cpu(), opts=dict(title='img'))
+                    0).cpu(), opts=dict(title='img shape '+str(img.shape)))
                 vis.image(win='gt', img=target.squeeze(0), opts=dict(
-                    title='gt ('+str(target.sum())+')'))
+                    title='gt ('+str(target.sum())+') shape ('+str(target.shape)+')'))
                 vis.image(win='et', img=output.cpu(), opts=dict(
-                    title='et ('+str(output.data.sum())+')'))
+                    title='et ('+str(output.data.sum())+') shape ('+str(output.shape)+')'))
 
     mae = mae/len(test_loader)
     print(' * MAE {mae:.3f} '
