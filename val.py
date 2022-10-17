@@ -56,9 +56,9 @@ with torch.no_grad():
         pred.append(pred_e)
         gt.append(gt_e)
         # print(i,mae)
-        if mae > max_error:
+        if error > max_error:
             max_error = error
-        if mae < min_error:
+        if error < min_error:
             min_error = error
 
         print('\r[{:>{}}/{}], error: {:.2f} pred: {:.2f}, gt: {:.2f}, {}'.format(i+1, len(str(len(img_paths))), len(img_paths), error, pred_e, gt_e, img_paths[i]), end='')
