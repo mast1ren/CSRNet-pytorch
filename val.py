@@ -56,10 +56,10 @@ def get_seq_class(seq, set):
     # return light, resolution, count
     return light, angle, bird, size
 
-with open('test.json','r') as f:
+with open('../../ds/dronebird/test.json','r') as f:
     img_paths=json.load(f)
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = CSRNet()
 
 model = model.to(device)
@@ -83,7 +83,7 @@ with torch.no_grad():
         # img[1,:,:]=img[1,:,:]-95.2757037428
         # img[2,:,:]=img[2,:,:]-104.877445883
         img_path = os.path.join('../../ds/dronebird', img_paths[i])
-        seq = int(img_path[3:6])
+        seq = int(os.path.basename(img_path)[3:6])
         light, angle, bird, size = get_seq_class(seq, 'test')
         gt_path = os.path.join(os.path.dirname(img_path).replace('images', 'ground_truth'), 'GT_'+os.path.basename(img_path).replace('jpg', 'h5'))
 
