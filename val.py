@@ -59,12 +59,12 @@ def get_seq_class(seq, set):
 with open('../../ds/dronebird/test.json','r') as f:
     img_paths=json.load(f)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 model = CSRNet()
 
 model = model.to(device)
 
-checkpoint = torch.load('0model_best.pth.tar', map_location={'cuda:0': 'cuda:1'})
+checkpoint = torch.load('0model_best.pth.tar', map_location={'cuda:0': 'cuda:3'})
 model.load_state_dict(checkpoint['state_dict'])
 
 mae = 0
@@ -73,8 +73,8 @@ min_error = 1000
 max_error = 0
 pred = []
 gt = []
-preds = [[] for i in range(10)]
-gts = [[] for i in range(10)]
+preds = [[] for i in range(8)]
+gts = [[] for i in range(8)]
 with torch.no_grad():
     for i in range(len(img_paths)):
         # img = 255.0 * F.to_tensor(Image.open(img_paths[i]).convert('RGB'))
@@ -84,6 +84,7 @@ with torch.no_grad():
         # img[2,:,:]=img[2,:,:]-104.877445883
         img_path = os.path.join('../../ds/dronebird', img_paths[i])
         seq = int(os.path.basename(img_path)[3:6])
+        seq = 'DJI_' + str(seq).zfill(4)
         light, angle, bird, size = get_seq_class(seq, 'test')
         gt_path = os.path.join(os.path.dirname(img_path).replace('images', 'ground_truth'), 'GT_'+os.path.basename(img_path).replace('jpg', 'h5'))
 
@@ -106,30 +107,30 @@ with torch.no_grad():
         # else:
         #     preds[2].append(pred_e)
         #     gts[2].append(gt_e)
-        if count == 'crowded':
+        # if count == 'crowded':
+        #     preds[2].append(pred_e)
+        #     gts[2].append(gt_e)
+        # else:
+        #     preds[3].append(pred_e)
+        #     gts[3].append(gt_e)
+        if angle == '60':
             preds[2].append(pred_e)
             gts[2].append(gt_e)
         else:
             preds[3].append(pred_e)
             gts[3].append(gt_e)
-        if angle == '60':
+        if bird == 'stand':
             preds[4].append(pred_e)
             gts[4].append(gt_e)
         else:
             preds[5].append(pred_e)
             gts[5].append(gt_e)
-        if bird == 'stand':
+        if size == 'small':
             preds[6].append(pred_e)
             gts[6].append(gt_e)
         else:
             preds[7].append(pred_e)
             gts[7].append(gt_e)
-        if size == 'small':
-            preds[8].append(pred_e)
-            gts[8].append(gt_e)
-        else:
-            preds[9].append(pred_e)
-            gts[9].append(gt_e)
 
         error = abs(gt_e-pred_e)
         # mae += error
@@ -147,13 +148,14 @@ with torch.no_grad():
 
 mae = mean_absolute_error(pred,gt)
 rmse = np.sqrt(mean_squared_error(pred,gt))
+with open('test_result.txt','w') as f:
+    f.write('MAE: {:.2f}, RMSE: {:.2f}\n'.format(mae, rmse))
+    print ('MAE: ',mae)
+    print ('RMSE: ',rmse)
 
-print ('MAE: ',mae)
-print ('RMSE: ',rmse)
-
-attri = ['sunny', 'backlight', 'crowded', 'sparse', '60', '90', 'stand', 'fly', 'small', 'mid']
-for i in range(10):
-    if len(preds[i]) == 0:
-        continue
-    print('{}: MAE:{}. RMSE:{}.'.format(attri[i], mean_absolute_error(preds[i], gts[i]), np.sqrt(mean_squared_error(preds[i], gts[i]))))
-
+    attri = ['sunny', 'backlight', '60', '90', 'stand', 'fly', 'small', 'mid']
+    for i in range(10):
+        if len(preds[i]) == 0:
+            continue
+        print('{}: MAE:{}. RMSE:{}.'.format(attri[i], mean_absolute_error(preds[i], gts[i]), np.sqrt(mean_squared_error(preds[i], gts[i]))))
+        f.write('{}: MAE:{}. RMSE:{}.\n'.format(attri[i], mean_absolute_error(preds[i], gts[i]), np.sqrt(mean_squared_error(preds[i], gts[i]))))
