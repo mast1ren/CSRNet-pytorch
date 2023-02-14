@@ -93,13 +93,13 @@ def main():
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.pre, checkpoint['epoch']))
 
-            train_loss = json.loads(vis.get_window_data(
-                win="train_loss", env="csrnet"))
-            test_error = json.loads(vis.get_window_data(
-                win="test_error", env="csrnet"))
-            epoch_list = train_loss["content"]["data"][0]["x"]
-            train_loss_list = train_loss["content"]["data"][0]["y"]
-            test_error_list = test_error["content"]["data"][0]["y"]
+            # train_loss = json.loads(vis.get_window_data(
+            #     win="train_loss", env="csrnet"))
+            # test_error = json.loads(vis.get_window_data(
+            #     win="test_error", env="csrnet"))
+            # epoch_list = train_loss["content"]["data"][0]["x"]
+            # train_loss_list = train_loss["content"]["data"][0]["y"]
+            # test_error_list = test_error["content"]["data"][0]["y"]
 
         else:
             print("=> no checkpoint found at '{}'".format(args.pre))
@@ -125,10 +125,10 @@ def main():
         }, is_best, args.task)
 
         # visdom plot
-        vis.line(win='train_loss', X=epoch_list,
-                 Y=train_loss_list, opts=dict(title='train_loss'))
-        vis.line(win='test_error', X=epoch_list,
-                 Y=test_error_list, opts=dict(title='test_error'))
+        # vis.line(win='train_loss', X=epoch_list,
+        #          Y=train_loss_list, opts=dict(title='train_loss'))
+        # vis.line(win='test_error', X=epoch_list,
+        #          Y=test_error_list, opts=dict(title='test_error'))
 
         # show an image
         # test_dataset = dataset.listDataset(val_list,
@@ -227,14 +227,14 @@ def validate(val_list, model):
 
             mae += abs(output.data.sum() -
                        target.sum().type(torch.FloatTensor).cuda())
-            if i == visual:
-                # print(img.shape, output.shape, target.shape)
-                vis.image(win='image', img=img.squeeze(
-                    0).cpu(), opts=dict(title='img shape '+str(img.shape)))
-                vis.image(win='gt', img=target.squeeze(0), opts=dict(
-                    title='gt ('+str(target.sum())+') shape ('+str(target.shape)+')'))
-                vis.image(win='et', img=output.cpu(), opts=dict(
-                    title='et ('+str(output.data.sum())+') shape ('+str(output.shape)+')'))
+            # if i == visual:
+            #     # print(img.shape, output.shape, target.shape)
+            #     vis.image(win='image', img=img.squeeze(
+            #         0).cpu(), opts=dict(title='img shape '+str(img.shape)))
+            #     vis.image(win='gt', img=target.squeeze(0), opts=dict(
+            #         title='gt ('+str(target.sum())+') shape ('+str(target.shape)+')'))
+            #     vis.image(win='et', img=output.cpu(), opts=dict(
+            #         title='et ('+str(output.data.sum())+') shape ('+str(output.shape)+')'))
 
     mae = mae/len(test_loader)
     print(' * MAE {mae:.3f} '

@@ -11,6 +11,7 @@ from image import *
 from model import CSRNet
 import torch
 from sklearn.metrics import mean_squared_error,mean_absolute_error
+import scipy.io as sio
 
 
 
@@ -21,7 +22,7 @@ transform=transforms.Compose([
                    ])
 
 def get_seq_class(seq, set):
-    backlight = ['DJI_0021', 'DJI_0032', 'DJI_0202', 'DJI_0339', 'DJI_0340']
+    backlight = ['DJI_0021','DJI_0022', 'DJI_0032', 'DJI_0202', 'DJI_0339', 'DJI_0340']
     # cloudy = ['DJI_0519', 'DJI_0554']
     
     # uhd = ['DJI_0332', 'DJI_0334', 'DJI_0339', 'DJI_0340', 'DJI_0342', 'DJI_0343', 'DJI_345', 'DJI_0348', 'DJI_0519', 'DJI_0544']
@@ -49,22 +50,22 @@ def get_seq_class(seq, set):
     # if seq in uhd:
     #     resolution = 'uhd'
     
-    # count = 'sparse'
-    # loca = sio.loadmat(os.path.join(set, seq, 'annotation/000000.mat'))['locations']
-    # if loca.shape[0] > 150:
-    #     count = 'crowded'
+    count = 'sparse'
+    loca = sio.loadmat(os.path.join('../../ds/dronebird/', set, 'ground_truth', 'GT_img'+str(seq[-3:])+'000.mat'))['locations']
+    if loca.shape[0] > 150:
+        count = 'crowded'
     # return light, resolution, count
-    return light, angle, bird, size
+    return light, angle, bird, size, count
 
 with open('../../ds/dronebird/test.json','r') as f:
     img_paths=json.load(f)
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = CSRNet()
 
 model = model.to(device)
 
-checkpoint = torch.load('0model_best.pth.tar', map_location={'cuda:0': 'cuda:3'})
+checkpoint = torch.load('0model_best.pth.tar', map_location={'cuda:0': 'cuda:0'})
 model.load_state_dict(checkpoint['state_dict'])
 
 mae = 0
@@ -73,8 +74,8 @@ min_error = 1000
 max_error = 0
 pred = []
 gt = []
-preds = [[] for i in range(8)]
-gts = [[] for i in range(8)]
+preds = [[] for i in range(10)]
+gts = [[] for i in range(10)]
 with torch.no_grad():
     for i in range(len(img_paths)):
         # img = 255.0 * F.to_tensor(Image.open(img_paths[i]).convert('RGB'))
@@ -85,7 +86,7 @@ with torch.no_grad():
         img_path = os.path.join('../../ds/dronebird', img_paths[i])
         seq = int(os.path.basename(img_path)[3:6])
         seq = 'DJI_' + str(seq).zfill(4)
-        light, angle, bird, size = get_seq_class(seq, 'test')
+        light, angle, bird, size, count = get_seq_class(seq, 'test')
         gt_path = os.path.join(os.path.dirname(img_path).replace('images', 'ground_truth'), 'GT_'+os.path.basename(img_path).replace('jpg', 'h5'))
 
 
@@ -107,30 +108,30 @@ with torch.no_grad():
         # else:
         #     preds[2].append(pred_e)
         #     gts[2].append(gt_e)
-        # if count == 'crowded':
-        #     preds[2].append(pred_e)
-        #     gts[2].append(gt_e)
-        # else:
-        #     preds[3].append(pred_e)
-        #     gts[3].append(gt_e)
-        if angle == '60':
+        if count == 'crowded':
             preds[2].append(pred_e)
             gts[2].append(gt_e)
         else:
             preds[3].append(pred_e)
             gts[3].append(gt_e)
-        if bird == 'stand':
+        if angle == '60':
             preds[4].append(pred_e)
             gts[4].append(gt_e)
         else:
             preds[5].append(pred_e)
             gts[5].append(gt_e)
-        if size == 'small':
+        if bird == 'stand':
             preds[6].append(pred_e)
             gts[6].append(gt_e)
         else:
             preds[7].append(pred_e)
             gts[7].append(gt_e)
+        if size == 'small':
+            preds[8].append(pred_e)
+            gts[8].append(gt_e)
+        else:
+            preds[9].append(pred_e)
+            gts[9].append(gt_e)
 
         error = abs(gt_e-pred_e)
         # mae += error
@@ -153,7 +154,7 @@ with open('test_result.txt','w') as f:
     print ('MAE: ',mae)
     print ('RMSE: ',rmse)
 
-    attri = ['sunny', 'backlight', '60', '90', 'stand', 'fly', 'small', 'mid']
+    attri = ['sunny', 'backlight', 'crowded', 'sparse', '60', '90', 'stand', 'fly', 'small', 'mid']
     for i in range(10):
         if len(preds[i]) == 0:
             continue
